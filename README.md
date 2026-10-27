@@ -83,7 +83,4 @@ Available options:
 
 Keep the JSON syntax valid: use double quotes around option names and text values, and do not add a comma after the final option. If an option is missing, the program fills it with its default value.
 
-## Dependencies
 
-Required libraries are listed in [`requirements.txt`](requirements.txt).
-# Pronote-Calendar-exporter
