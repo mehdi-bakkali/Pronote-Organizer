@@ -12,7 +12,7 @@ This project retrieves lessons from a Pronote account and exports them to an iCa
 Clone the repository and move into its directory:
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone <https://github.com/mehdi-bakkali/Pronote-Calendar-exporter>
 cd pronote
 ```
 
