@@ -1,0 +1,9 @@
+{
+  "ics_output_path": "timetable.ics",
+  "start_date": "2026-05-11",
+  "days_ahead": 5,
+  "auto_refresh": true,
+  "calendar_name": "My school Schedule",
+  "include_teacher": true,
+  "include_classroom": true
+}

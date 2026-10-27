@@ -1,0 +1,27 @@
+# Environnements virtuels Python
+.venv/
+venv/
+env/
+ENV/
+
+# Fichiers Python générés
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+# Generated Pronote exports (may contain personal school data)
+timetable.ics
+pronote_homework.csv
+pronote_grades.csv
+
+# Outils de développement et système
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

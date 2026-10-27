@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Pronote Organizer</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #20253a;
+            --muted: #747b91;
+            --line: #e8eaf1;
+            --surface: #ffffff;
+            --page: #f5f7fb;
+            --purple: #6658d3;
+            --purple-dark: #5143bd;
+            --purple-soft: #f0eeff;
+            --green: #16845b;
+            --green-soft: #e8f7ef;
+            --red: #a73e4a;
+            --red-soft: #fff0f1;
+            --shadow: 0 12px 34px rgba(31, 39, 73, .055);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-width: 320px;
+            background: var(--page);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        button, input { font: inherit; }
+        a { color: inherit; }
+
+        .app-shell { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+        .topbar {
+            min-height: 78px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9ebf2;
+        }
+        .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-mark {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #7869e8, #5547c0);
+            color: white;
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -.06em;
+            box-shadow: 0 7px 15px rgba(102, 88, 211, .2);
+        }
+        .brand-name { display: block; font-size: 15px; font-weight: 750; letter-spacing: -.02em; }
+        .brand-caption { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .13em; }
+        .local-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255,255,255,.8);
+            color: #545b70;
+            font-size: 12px;
+            font-weight: 650;
+        }
+        .local-dot { width: 7px; height: 7px; border-radius: 50%; background: #29a575; box-shadow: 0 0 0 3px #e7f6ee; }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 38px 0 28px;
+        }
+        .eyebrow { margin: 0 0 9px; color: var(--purple); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        h1 { margin: 0; font-size: clamp(28px, 4vw, 38px); line-height: 1.14; letter-spacing: -.045em; }
+        .hero-copy { max-width: 600px; margin: 11px 0 0; color: var(--muted); font-size: 15px; }
+        .hero-note {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 250px;
+            padding: 13px 16px;
+            border: 1px solid #e7e4ff;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fff, #f7f6ff);
+            color: #5b547e;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .hero-note-icon { display: grid; flex: 0 0 34px; height: 34px; place-items: center; border-radius: 11px; background: var(--purple-soft); color: var(--purple); font-size: 17px; }
+
+        .flash-messages { display: grid; gap: 9px; margin: 0 0 18px; }
+        .flash { padding: 12px 15px; border: 1px solid transparent; border-radius: 12px; font-size: 13px; }
+        .flash.success { background: var(--green-soft); border-color: #ccebd9; color: #176b4c; }
+        .flash.error { background: var(--red-soft); border-color: #f6d1d5; color: #8e3540; }
+        .flash.info { background: #eef4ff; border-color: #d8e5ff; color: #405c91; }
+
+        .status-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .status-card, .panel {
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+        .status-card { display: flex; align-items: center; gap: 13px; min-height: 90px; padding: 16px 18px; }
+        .status-icon { display: grid; flex: 0 0 42px; height: 42px; place-items: center; border-radius: 13px; background: #f2f3f8; color: #687089; font-size: 18px; }
+        .status-icon.purple { background: var(--purple-soft); color: var(--purple); }
+        .status-icon.green { background: var(--green-soft); color: var(--green); }
+        .status-label { display: block; margin-bottom: 2px; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .075em; text-transform: uppercase; }
+        .status-value { display: block; overflow: hidden; color: var(--ink); font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+        .status-value.success { color: var(--green); }
+
+        .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 310px; align-items: start; gap: 20px; padding-bottom: 36px; }
+        .main-column, .side-column { display: grid; gap: 20px; min-width: 0; }
+        .panel { padding: 23px; }
+        .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+        .panel-heading h2 { margin: 0; font-size: 17px; letter-spacing: -.025em; }
+        .panel-heading p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+        .panel-kicker { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 650; }
+        .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px 16px; }
+        .field label { display: block; margin-bottom: 7px; color: #42485c; font-size: 12px; font-weight: 700; }
+        .field input {
+            display: block;
+            width: 100%;
+            min-height: 43px;
+            padding: 9px 12px;
+            border: 1px solid #dfe2eb;
+            border-radius: 10px;
+            outline: none;
+            background: #fff;
+            color: var(--ink);
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+        .field input:focus { border-color: #9489ed; box-shadow: 0 0 0 3px rgba(102,88,211,.12); }
+        .field .hint { margin: 6px 0 0; color: #8a90a2; font-size: 11px; }
+        .toggle-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 19px; }
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 59px; padding: 10px 12px; border: 1px solid #eceef4; border-radius: 12px; background: #fbfcfe; }
+        .toggle-title { display: block; color: #42485c; font-size: 12px; font-weight: 700; }
+        .toggle-help { display: block; margin-top: 2px; color: #8a90a2; font-size: 10px; }
+        .switch { position: relative; display: inline-flex; flex: 0 0 39px; width: 39px; height: 23px; }
+        .switch input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+        .switch-track { position: absolute; inset: 0; border-radius: 99px; background: #d5d8e2; cursor: pointer; transition: background .18s ease; }
+        .switch-track::after { position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0002; content: ""; transition: transform .18s ease; }
+        .switch input:checked + .switch-track { background: var(--purple); }
+        .switch input:checked + .switch-track::after { transform: translateX(16px); }
+        .switch input:focus-visible + .switch-track { outline: 3px solid rgba(102,88,211,.25); outline-offset: 2px; }
+        .form-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; padding-top: 18px; border-top: 1px solid #eff0f5; }
+        .btn {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 750;
+            text-decoration: none;
+            transition: transform .15s ease, background .15s ease, border-color .15s ease;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: var(--purple); color: #fff; box-shadow: 0 5px 12px rgba(102,88,211,.18); }
+        .btn-primary:hover { background: var(--purple-dark); }
+        .btn-secondary { border-color: #e5e7ef; background: #fff; color: #4c5268; }
+        .btn-secondary:hover { border-color: #cec9fa; background: #faf9ff; }
+        .btn-quiet { background: transparent; color: #737a8e; }
+        .btn-quiet:hover { background: #f4f5f9; color: #42485c; }
+        .btn-full { width: 100%; }
+
+        .export-card { overflow: hidden; padding: 0; }
+        .export-top { padding: 22px 22px 17px; border-bottom: 1px solid #eff0f5; }
+        .export-top h2 { margin: 0; font-size: 17px; letter-spacing: -.025em; }
+        .export-top p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+        .export-options { display: grid; gap: 10px; padding: 16px; }
+        .export-link { display: flex; align-items: center; gap: 12px; padding: 13px; border: 1px solid #eceef4; border-radius: 13px; text-decoration: none; transition: border-color .15s ease, background .15s ease; }
+        .export-link:hover { border-color: #d4cffd; background: #fbfaff; }
+        .export-file-icon { display: grid; flex: 0 0 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--purple-soft); color: var(--purple); font-size: 11px; font-weight: 850; }
+        .export-copy { min-width: 0; flex: 1; }
+        .export-copy strong { display: block; color: #343a50; font-size: 12px; }
+        .export-copy small { display: block; margin-top: 2px; color: #858b9d; font-size: 10px; }
+        .export-arrow { color: #9a9fb0; font-size: 17px; }
+        .privacy-note { padding: 14px 16px; border-top: 1px solid #eff0f5; background: #fafbfe; color: #737a8e; font-size: 11px; }
+        .privacy-note strong { color: #555c72; }
+
+        .preview-panel { min-height: 230px; }
+        .preview-count { display: inline-flex; min-width: 25px; height: 25px; align-items: center; justify-content: center; padding: 0 7px; border-radius: 99px; background: var(--purple-soft); color: var(--purple); font-size: 11px; font-weight: 800; }
+        .preview-list { display: grid; gap: 9px; }
+        .lesson-item { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 13px; padding: 13px; border: 1px solid #eceef4; border-radius: 12px; background: #fff; }
+        .lesson-time { align-self: start; padding: 7px 8px; border-radius: 9px; background: #f3f2ff; color: #5b50bd; font-size: 10px; font-weight: 800; text-align: center; }
+        .lesson-subject { overflow: hidden; color: #30364b; font-size: 13px; font-weight: 750; text-overflow: ellipsis; }
+        .lesson-details { display: flex; flex-wrap: wrap; gap: 5px 13px; margin-top: 4px; color: #7a8194; font-size: 10px; }
+        .empty-state, .loading { padding: 26px 14px; border: 1px dashed #e1e4ed; border-radius: 12px; color: #81889b; font-size: 12px; text-align: center; }
+        .loading-dot { display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 0 4px var(--purple-soft); }
+        .footer { padding: 0 0 24px; color: #959bad; font-size: 10px; text-align: center; }
+
+        @media (max-width: 860px) {
+            .workspace { grid-template-columns: minmax(0, 1fr) 270px; gap: 14px; }
+            .panel { padding: 19px; }
+            .export-top { padding-right: 18px; padding-left: 18px; }
+        }
+        @media (max-width: 700px) {
+            .app-shell { width: min(100% - 30px, 560px); }
+            .topbar { min-height: 68px; }
+            .hero { align-items: flex-start; padding: 30px 0 22px; }
+            .hero-note { display: none; }
+            .status-grid { grid-template-columns: 1fr; gap: 9px; }
+            .status-card { min-height: 72px; }
+            .workspace { display: flex; flex-direction: column; }
+            .main-column, .side-column { width: 100%; }
+            .side-column { order: -1; }
+            .export-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .export-link { align-items: flex-start; gap: 8px; padding: 10px; }
+            .export-file-icon { flex-basis: 32px; height: 32px; }
+            .export-arrow { display: none; }
+        }
+        @media (max-width: 460px) {
+            .app-shell { width: calc(100% - 22px); }
+            .local-tag { padding: 7px 9px; font-size: 10px; }
+            .settings-grid, .toggle-list { grid-template-columns: 1fr; }
+            .panel { padding: 16px; border-radius: 14px; }
+            .export-options { grid-template-columns: 1fr; }
+            .form-actions .btn { flex: 1 1 100%; }
+            .lesson-item { grid-template-columns: 70px minmax(0, 1fr); gap: 9px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="{{ url_for('index') }}" aria-label="Pronote Organizer home">
+                <span class="brand-mark" aria-hidden="true">p.</span>
+                <span>
+                    <span class="brand-name">Pronote Organizer</span>
+                    <span class="brand-caption">PERSONAL DASHBOARD</span>
+                </span>
+            </a>
+            <span class="local-tag"><span class="local-dot" aria-hidden="true"></span>Running locally</span>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div>
+                    <p class="eyebrow">Your school, organized</p>
+                    <h1>Everything in one place.</h1>
+                    <p class="hero-copy">Set up your calendar, keep an eye on upcoming lessons, and download your homework and grades.</p>
+                </div>
+                <div class="hero-note"><span class="hero-note-icon" aria-hidden="true">✦</span><span>Your schedule, homework, and grades in one simple dashboard.</span></div>
+            </section>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages" role="status" aria-live="polite">
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <section class="status-grid" aria-label="Calendar status">
+                <article class="status-card">
+                    <span class="status-icon purple" aria-hidden="true">▤</span>
+                    <span class="status-copy"><span class="status-label">Calendar file</span><span class="status-value" id="ics-status">Checking…</span></span>
+                </article>
+                <article class="status-card">
+                    <span class="status-icon" aria-hidden="true">◷</span>
+                    <span class="status-copy"><span class="status-label">Last generated</span><span class="status-value" id="ics-mtime">—</span></span>
+                </article>
+                <article class="status-card">
+                    <span class="status-icon green" aria-hidden="true">↻</span>
+                    <span class="status-copy"><span class="status-label">Automatic refresh</span><span class="status-value" id="auto-refresh-status">Checking…</span></span>
+                </article>
+            </section>
+
+            <section class="workspace">
+                <div class="main-column">
+                    <section class="panel" aria-labelledby="settings-title">
+                        <div class="panel-heading">
+                            <div>
+                                <h2 id="settings-title">Calendar settings</h2>
+                                <p>Choose what to include in your schedule export.</p>
+                            </div>
+                            <span class="panel-kicker">● Saved on this device</span>
+                        </div>
+
+                        <form action="{{ url_for('save_configuration') }}" method="post">
+                            <div class="settings-grid">
+                                <div class="field">
+                                    <label for="ics_output_path">Calendar file path</label>
+                                    <input type="text" id="ics_output_path" name="ics_output_path" value="{{ config.ics_output_path }}" placeholder="timetable.ics">
+                                    <p class="hint">Where the generated .ics file will be saved.</p>
+                                </div>
+                                <div class="field">
+                                    <label for="calendar_name">Calendar name</label>
+                                    <input type="text" id="calendar_name" name="calendar_name" value="{{ config.calendar_name }}" placeholder="My Pron Schedule">
+                                    <p class="hint">The name shown in your calendar app.</p>
+                                </div>
+                                <div class="field">
+                                    <label for="start_date">Start date</label>
+                                    <input type="date" id="start_date" name="start_date" value="{{ config.start_date }}" required>
+                                    <p class="hint">First day included in the export.</p>
+                                </div>
+                                <div class="field">
+                                    <label for="days_ahead">Days to include</label>
+                                    <input type="number" id="days_ahead" name="days_ahead" value="{{ config.days_ahead }}" min="1" max="30" required>
+                                    <p class="hint">Choose between 1 and 30 days.</p>
+                                </div>
+                            </div>
+
+                            <div class="toggle-list">
+                                <div class="toggle-row">
+                                    <span><span class="toggle-title">Automatic refresh</span><span class="toggle-help">Update the calendar in the background.</span></span>
+                                    <label class="switch" aria-label="Automatic refresh">
+                                        <input type="checkbox" id="auto_refresh" name="auto_refresh" {% if config.auto_refresh %}checked{% endif %}>
+                                        <span class="switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <span><span class="toggle-title">Teacher names</span><span class="toggle-help">Show teachers in lesson details.</span></span>
+                                    <label class="switch" aria-label="Include teacher names">
+                                        <input type="checkbox" id="include_teacher" name="include_teacher" {% if config.include_teacher %}checked{% endif %}>
+                                        <span class="switch-track"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-row">
+                                    <span><span class="toggle-title">Classrooms</span><span class="toggle-help">Show the room for each lesson.</span></span>
+                                    <label class="switch" aria-label="Include classrooms">
+                                        <input type="checkbox" id="include_classroom" name="include_classroom" {% if config.include_classroom %}checked{% endif %}>
+                                        <span class="switch-track"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save settings <span aria-hidden="true">→</span></button>
+                                <button type="submit" form="generate-form" class="btn btn-secondary">Generate calendar now</button>
+                                <button type="submit" form="reset-form" class="btn btn-quiet">Reset to defaults</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="panel preview-panel" id="lessons-preview" aria-labelledby="preview-title">
+                        <div class="panel-heading">
+                            <div>
+                                <h2 id="preview-title">Upcoming lessons</h2>
+                                <p>Based on your selected date range.</p>
+                            </div>
+                            <span class="preview-count" id="preview-count" aria-label="Number of upcoming lessons">—</span>
+                        </div>
+                        <div class="loading" id="preview-loading"><span class="loading-dot" aria-hidden="true"></span>Loading your lessons…</div>
+                        <div id="preview-content" class="preview-list"></div>
+                    </section>
+                </div>
+
+                <aside class="side-column">
+                    <section class="panel export-card" aria-labelledby="exports-title">
+                        <div class="export-top">
+                            <h2 id="exports-title">Your exports</h2>
+                            <p>Download your Pronote data as a spreadsheet.</p>
+                        </div>
+                        <div class="export-options">
+                            <a class="export-link" href="{{ url_for('export_homework_csv') }}">
+                                <span class="export-file-icon" aria-hidden="true">CSV</span>
+                                <span class="export-copy"><strong>Homework</strong><small>Due dates, subjects, status</small></span>
+                                <span class="export-arrow" aria-hidden="true">↓</span>
+                            </a>
+                            <a class="export-link" href="{{ url_for('export_grades_csv') }}">
+                                <span class="export-file-icon" aria-hidden="true">CSV</span>
+                                <span class="export-copy"><strong>Grades</strong><small>Scores from all periods</small></span>
+                                <span class="export-arrow" aria-hidden="true">↓</span>
+                            </a>
+                        </div>
+                        <div class="privacy-note"><strong>Private by default.</strong> CSV files are generated on demand from your Pronote account.</div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-heading" style="margin-bottom: 9px;">
+                            <div>
+                                <h2>Quick tip</h2>
+                                <p>Keep your calendar up to date.</p>
+                            </div>
+                        </div>
+                        <p style="margin: 0; color: var(--muted); font-size: 12px;">Enable automatic refresh to regenerate your calendar while this app is running.</p>
+                    </section>
+                </aside>
+            </section>
+        </main>
+
+        <footer class="footer">Pronote Organizer · Runs on your device</footer>
+    </div>
+
+    <form id="generate-form" action="{{ url_for('generate_ics') }}" method="post" hidden></form>
+    <form id="reset-form" action="{{ url_for('reset_defaults') }}" method="post" hidden></form>
+
+    <script>
+        const previewLoading = document.getElementById('preview-loading');
+        const previewContent = document.getElementById('preview-content');
+        const previewCount = document.getElementById('preview-count');
+
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (!response.ok) throw new Error('Status unavailable');
+                const data = await response.json();
+                const icsStatus = document.getElementById('ics-status');
+                const icsMtime = document.getElementById('ics-mtime');
+                const refreshStatus = document.getElementById('auto-refresh-status');
+
+                icsStatus.textContent = data.ics_file.exists ? 'Ready' : 'Not generated yet';
+                icsStatus.classList.toggle('success', data.ics_file.exists);
+                icsMtime.textContent = data.ics_file.last_modified
+                    ? new Date(data.ics_file.last_modified).toLocaleString()
+                    : '—';
+                refreshStatus.textContent = data.config.auto_refresh ? 'Enabled' : 'Disabled';
+                refreshStatus.classList.toggle('success', data.config.auto_refresh);
+            } catch (error) {
+                document.getElementById('ics-status').textContent = 'Unavailable';
+                document.getElementById('ics-mtime').textContent = '—';
+                document.getElementById('auto-refresh-status').textContent = 'Unavailable';
+            }
+        }
+
+        function addLesson(lesson) {
+            const item = document.createElement('article');
+            item.className = 'lesson-item';
+
+            const time = document.createElement('div');
+            time.className = 'lesson-time';
+            time.textContent = `${lesson.start || ''} – ${lesson.end || ''}`;
+
+            const body = document.createElement('div');
+            const subject = document.createElement('div');
+            subject.className = 'lesson-subject';
+            subject.textContent = lesson.subject || 'Lesson';
+
+            const details = document.createElement('div');
+            details.className = 'lesson-details';
+            const room = document.createElement('span');
+            room.textContent = `Room: ${lesson.classroom || '—'}`;
+            const teacher = document.createElement('span');
+            teacher.textContent = `Teacher: ${lesson.teacher || '—'}`;
+            details.append(room, teacher);
+            body.append(subject, details);
+            item.append(time, body);
+            previewContent.append(item);
+        }
+
+        async function loadPreview() {
+            try {
+                const response = await fetch('/api/preview');
+                const data = await response.json();
+                previewLoading.hidden = true;
+                previewContent.replaceChildren();
+
+                if (!response.ok || data.error) {
+                    previewCount.textContent = '—';
+                    const message = document.createElement('div');
+                    message.className = 'empty-state';
+                    message.textContent = 'Could not load lessons. Check your Pronote connection and try again.';
+                    previewContent.append(message);
+                    return;
+                }
+
+                const lessons = data.lessons || [];
+                previewCount.textContent = String(lessons.length);
+                if (lessons.length === 0) {
+                    const message = document.createElement('div');
+                    message.className = 'empty-state';
+                    message.textContent = 'No lessons found for this date range.';
+                    previewContent.append(message);
+                    return;
+                }
+                lessons.forEach(addLesson);
+            } catch (error) {
+                previewLoading.hidden = true;
+                previewCount.textContent = '—';
+                const message = document.createElement('div');
+                message.className = 'empty-state';
+                message.textContent = 'Could not connect to the lessons service.';
+                previewContent.replaceChildren(message);
+            }
+        }
+
+        updateStatus();
+        loadPreview();
+        window.setInterval(updateStatus, 30000);
+    </script>
+</body>
+</html>
