@@ -44,8 +44,6 @@ PRONOTE_USERNAME=your_username
 PRONOTE_PASSWORD=your_password
 ```
 
-Do not commit real credentials to a public repository. If you plan to publish this project, leave these values blank before pushing and enter your credentials locally afterward.
-
 ## Usage
 
 ### Web interface
